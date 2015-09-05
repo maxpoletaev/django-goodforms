@@ -100,7 +100,7 @@ def radio(field, label=None, **attrs):
 
 
 @register.simple_tag
-def select(field, values, key='id', label='name', **attrs):
+def select(field, values, value_key='id', value_label='name', **attrs):
     value = attrs.get('value', field.value())
     placeholder = attrs.get('placeholder')
     options = ''
@@ -114,14 +114,20 @@ def select(field, values, key='id', label='name', **attrs):
             options += tags.option(option_label, value=option_value, selected=selected)
 
     else:
-        for option in values:
-            option_value = getattr(option, key)
+        def attr(option, key):
+            if isinstance(option, dict):
+                option_value = option.get(key)
+            else:
+                option_value = getattr(option, key)
+
             if hasattr(option_value, '__call__'):
                 option_value = option_value()
 
-            option_label = getattr(option, label)
-            if hasattr(option_label, '__call__'):
-                option_label = option_label()
+            return option_value
+
+        for option in values:
+            option_value = attr(option, value_key)
+            option_label = attr(option, value_label)
 
             selected = (str(value) == str(option_value))
             options += tags.option(option_label, value=option_value, selected=selected)
