@@ -100,7 +100,7 @@ Tips
 You can use any of field without a form class::
 
     {% input "username" required=True %}
-    {% select "city" values="New York:1, London:2" required=True %}
+    {% select "city" values="1:New York, 2:London" %}
 
 
 Settigns
