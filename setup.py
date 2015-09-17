@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 setup(
     name='django-goodforms',
     version='0.1.0',
-    description='Rails-like renderer for your form fields',
+    description='Custom renderer for your form fields',
     long_description=open('README.rst').read(),
     author='Maxim Poletaev',
     author_email='zenwalker2@gmail.com',

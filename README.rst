@@ -61,11 +61,11 @@ Select
 
 ::
 
-    {% select form.country values="Russia:ru,Germany:de" %}
+    {% select form.country values="ru:Russia,de:Germany" %}
 
-You can use any collection or queryset as values::
+You can use any dict, iterable collection or queryset as values list::
 
-    {% select form.county values=queryset_or_collection value_key="id" value_label="title" %}
+    {% select form.county values=queryset_or_collection value_key="code" label_key="title" %}
 
 
 Checkbox and radio-button
@@ -76,7 +76,7 @@ Checkbox and radio-button
     {% radio form.gender value="female" %}
     {% radio form.gender value="male" %}
 
-The `label` attribute wraps checkbox to `label` tag. All attributes provite to it::
+The ``label`` attribute wraps checkbox to ``<label>`` tag. All attributes provite to it::
 
     {% checkbox form.agree label="I agree" style="font-weight: bold;" %}
 
@@ -101,3 +101,13 @@ You can use any of field without a form class::
 
     {% input "username" required=True %}
     {% select "city" values="New York:1, London:2" required=True %}
+
+
+Settigns
+--------
+
+``GOODFORMS_XHTML`` — Enable or disable XHTML syntax (default: ``False``)
+
+``GOODFORMS_AUTO_ID`` — Automatically generate ``id`` and ``for`` attributes for fields and labels (default: ``True``)
+
+``GOODFORMS_ID_PREFIX`` — Prefix for auto-generated ``id`` and ``for`` attributes (default: ``field_``)
