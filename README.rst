@@ -34,7 +34,7 @@ The template::
 
     <form method="post">{% csrf_token %}
         <div>
-            Your name: {% input form.name placenolder="John Smith" %}
+            Your name: {% textfield form.name placenolder="John Smith" %}
         </div>
         <div>
             You gender: {% radio form.gender label="Male" value="male" %}

@@ -50,7 +50,7 @@ def render_tag(tag, content=None, closeable=False, xhtml=False, **attrs):
 class HtmlTags:
     tags_preset = {
         'button': {'closeable': True},
-        'textarea': {'closeable': True}
+        'textarea': {'closeable': True},
     }
 
     def __init__(self, xhtml=False):
