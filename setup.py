@@ -2,14 +2,17 @@ from setuptools import setup
 
 setup(
     name='django-goodforms',
-    version='0.1.0',
+    version='0.1.1',
     description='Custom renderer for django form fields',
     keywords='django forms',
     author='Maxim Poletaev',
-    author_email='zenwalker2@gmail.com',
+    author_email='max.poletaev@gmail.com',
     license='BSD',
     url='https://github.com/zenwalker/django-goodforms',
     packages=['goodforms', 'goodforms.templatetags'],
+    install_requires=[
+        'htmlutils>=0.1.0',
+    ],
     classifiers=[
         'Development Status :: 4 - Beta',
         'Programming Language :: Python :: 3.3',

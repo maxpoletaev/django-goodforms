@@ -1,7 +1,7 @@
 from collections import OrderedDict, Iterable
 from django.forms.forms import BoundField
 from django.template import Library
-from goodforms.html import HtmlTags
+from htmlutils.html import HtmlTags
 from django.conf import settings
 
 tags = HtmlTags(xhtml=settings.GOODFORMS_XHTML)
