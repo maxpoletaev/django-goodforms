@@ -36,7 +36,7 @@ def textfield(field, **attrs):
     if isinstance(field, BoundField):
         attrs['name'] = field.name
         if settings.GOODFORMS_AUTO_ID:
-            attrs.setdefault('id', 'field_' + field.name)
+            attrs.setdefault('id', settings.GOODFORMS_ID_PREFIX + field.name)
 
         if 'value' not in attrs:
             field_value = field.value()
