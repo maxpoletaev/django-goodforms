@@ -9,35 +9,12 @@ tags = HtmlTags(xhtml=settings.GOODFORMS_XHTML)
 register = Library()
 
 
-def parse_values(values):
-    rows = values.split(',')
-    data = OrderedDict()
-
-    for row in rows:
-        key, value = row.strip().split(':')
-        value = value.strip()
-        key = key.strip()
-
-        if value in ['None', 'null']:
-            value = None
-        elif value in ['True', 'true']:
-            value = True
-        elif value in ['False', 'false']:
-            value = False
-
-        data[key] = value
-
-    return data
-
-
-@register.simple_tag
-def textfield(field, **attrs):
+@register.simple_tag(takes_context=True)
+def textfield(context, field, **attrs):
     attrs.setdefault('type', 'text')
 
     if isinstance(field, BoundField):
         attrs['name'] = field.name
-        if settings.GOODFORMS_AUTO_ID:
-            attrs.setdefault('id', settings.GOODFORMS_ID_PREFIX + field.name)
 
         if 'value' not in attrs:
             field_value = field.value()
@@ -48,18 +25,15 @@ def textfield(field, **attrs):
 
     elif isinstance(field, str):
         attrs['name'] = field
-        if settings.GOODFORMS_AUTO_ID:
-            attrs.setdefault('id', settings.GOODFORMS_ID_PREFIX + field)
 
+    attrs.setdefault('id', get_field_id(context, attrs.get('name')))
     return tags.input(**attrs)
 
 
-@register.simple_tag
-def textarea(field, value=None, **attrs):
+@register.simple_tag(takes_context=True)
+def textarea(context, field, value=None, **attrs):
     if isinstance(field, BoundField):
         attrs['name'] = field.name
-        if settings.GOODFORMS_AUTO_ID:
-            attrs.setdefault('id', settings.GOODFORMS_ID_PREFIX + field.name)
 
         if not value:
             value = field.value()
@@ -69,29 +43,26 @@ def textarea(field, value=None, **attrs):
 
     elif isinstance(field, str):
         attrs['name'] = field
-        if settings.GOODFORMS_AUTO_ID:
-            attrs.setdefault('id', settings.GOODFORMS_ID_PREFIX + field)
 
+    attrs.setdefault('id', get_field_id(context, attrs.get('name')))
     return tags.textarea(value, **attrs)
 
 
-@register.simple_tag
-def checkbox(field, label, **attrs):
+@register.simple_tag(takes_context=True)
+def checkbox(context, field, label=None, **attrs):
     attrs.setdefault('type', 'checkbox')
 
     if isinstance(field, BoundField):
         attrs['name'] = field.name
-        if settings.GOODFORMS_AUTO_ID:
-            attrs.setdefault('id', settings.GOODFORMS_ID_PREFIX + field.name)
+
         if 'value' in attrs:
             attrs['checked'] = (field.value() == attrs['value'])
 
     elif isinstance(field, str):
         attrs['name'] = field
-        if settings.GOODFORMS_AUTO_ID:
-            attrs.setdefault('id', settings.GOODFORMS_ID_PREFIX + field)
 
     if not label:
+        attrs.setdefault('id', get_field_id(context, attrs.get('name')))
         return tags.input(**attrs)
 
     input_attrs_keys = ['value', 'name', 'type', 'checked', 'id']
@@ -99,21 +70,24 @@ def checkbox(field, label, **attrs):
     input_attrs = {}
 
     for key in input_attrs_keys:
-        input_attrs[key] = attrs.get(key)
-        del label_attrs[key]
+        value = attrs.get(key)
 
-    checkbox = tags.input(**input_attrs) + ' ' + label
+        if value:
+            input_attrs[key] = value
+            del label_attrs[key]
+
+    checkbox = tags.input(**input_attrs) + ' ' + tags.span(label)
     return tags.label(checkbox, **label_attrs)
 
 
-@register.simple_tag
-def radio(field, label=None, **attrs):
+@register.simple_tag(takes_context=True)
+def radio(context, field, label=None, **attrs):
     attrs.setdefault('type', 'radio')
-    return checkbox(field, label, **attrs)
+    return checkbox(context, field, label, **attrs)
 
 
-@register.simple_tag
-def select(field, values, value_key=None, label_key=None, **attrs):
+@register.simple_tag(takes_context=True)
+def select(context, field, values, value_key=None, label_key=None, **attrs):
     placeholder = attrs.get('placeholder')
     select_value = attrs.get('value')
     options_html = ''
@@ -135,13 +109,9 @@ def select(field, values, value_key=None, label_key=None, **attrs):
     if isinstance(field, BoundField):
         attrs['name'] = field.name
         select_value = attrs.get('value', field.value())
-        if settings.GOODFORMS_AUTO_ID:
-            attrs.setdefault('id', settings.GOODFORMS_ID_PREFIX + field.name)
 
     elif isinstance(field, str):
         attrs['name'] = field
-        if settings.GOODFORMS_AUTO_ID:
-            attrs.setdefault('id', settings.GOODFORMS_ID_PREFIX + field)
 
     if isinstance(values, str):
         for option_value, option_label in parse_values(values).items():
@@ -171,19 +141,17 @@ def select(field, values, value_key=None, label_key=None, **attrs):
             selected = str(select_value) == str(option_value)
             options_html += tags.option(option_label, value=option_value, selected=selected)
 
+    attrs.setdefault('id', get_field_id(context, attrs.get('name')))
     return tags.select(options_html, **attrs)
 
 
-@register.simple_tag
-def label(field, content='', **attrs):
+@register.simple_tag(takes_context=True)
+def label(context, field, content='', **attrs):
     if isinstance(field, BoundField):
-        if settings.GOODFORMS_AUTO_ID:
-            attrs['for'] = settings.GOODFORMS_ID_PREFIX + field.name
+        attrs.setdefault('for', get_field_id(context, field.name))
+
         if not content:
             content = field.label
-
-    elif isinstance(field, str):
-        attrs['for'] = settings.GOODFORMS_ID_PREFIX + field
 
     return tags.label(content, **attrs)
 
@@ -198,30 +166,54 @@ def submit_button(label='Submit', **attrs):
 class FormNode(Node):
     def __init__(self, parser, token):
         self.nodelist = parser.parse(('endform', ))
-        parser.delete_first_token()
-
         bits = token.split_contents()[1:]
+        parser.delete_first_token()
         self.attrs = self.parse_attrs(bits, parser)
-        self.name = self.attrs.get('name')
 
     def parse_attrs(self, bits, parser):
-        attrs = {}
-        for bit in bits:
-            kwarg = token_kwargs([bit], parser)
+        kwargs = token_kwargs(bits, parser)
+        return {k: v for k, v in kwargs.items()}
 
-            if kwarg:
-                key, value = kwarg.popitem()
-                attrs[key] = value
-
-        return attrs
-
-    def get_resolved_attrs(self, context):
-        kwargs = {
-            k: v.resolve(context) for k, v in self.attrs.items()
-        }
-        return kwargs
+    def resolve_attrs(self, context):
+        return {k: v.resolve(context) for k, v in self.attrs.items()}
 
     def render(self, context):
+        attrs = self.resolve_attrs(context)
+
+        context.push()
+        context['FORM_NAME'] = attrs.get('name')
         output = self.nodelist.render(context)
-        attrs = self.get_resolved_attrs(context)
+        context.pop()
+
+        csrf_token = context.get('csrf_token')
+        if csrf_token and csrf_token != 'NOTPROVIDED':
+            output += tags.input(type='hidden', name='csrfmiddlewaretoken', value=csrf_token)
+
         return tags.form(output, **attrs)
+
+
+def parse_values(values):
+    rows = values.split(',')
+    data = OrderedDict()
+
+    for row in rows:
+        key, value = row.strip().split(':')
+        value = value.strip()
+        key = key.strip()
+
+        if value in ['None', 'null']:
+            value = None
+        elif value in ['True', 'true']:
+            value = True
+        elif value in ['False', 'false']:
+            value = False
+
+        data[key] = value
+
+    return data
+
+
+def get_field_id(context, field_name):
+    if settings.GOODFORMS_AUTO_ID and field_name:
+        prefix = context.get('FORM_NAME', settings.GOODFORMS_ID_PREFIX)
+        return prefix + '_' + field_name

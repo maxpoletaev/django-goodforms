@@ -32,28 +32,35 @@ The template::
 
     {% load form_fields %}
 
-    <form method="post">{% csrf_token %}
-        <div>
-            Your name: {% textfield form.name placenolder="John Smith" %}
-        </div>
-        <div>
-            You gender: {% radio form.gender label="Male" value="male" %}
-                        {% radio form.gender label="Female" value="female" %}
-        </div>
-        {% submit_button %}
-    </form>
+    {% form name="login" class="login-form" %}
+        {% textfield form.username class="login-form_input" %}
+        {% textfield form.password class="login-form_input" %}
+        {% submit_button "Login" %}
+    {% endform %}
 
 
 Controls
 --------
+
+Form tag
+~~~~~~~~
+
+Form tag automatically inject csrf-token.
+
+::
+
+    {% form name="myform" %}
+        <!-- Form content -->
+    {% endform %}
+
 
 Textfield and Textarea
 ~~~~~~~~~~~~~~~~~~~~~~
 
 ::
 
-    {% textfield form.title **attrs %}
-    {% textarea form.description **attrs %}
+    {% textfield form.title **kwargs %}
+    {% textarea form.description **kwargs %}
 
 
 Select
@@ -81,7 +88,7 @@ The ``label`` attribute wraps checkbox to ``<label>`` tag. All attributes provit
     {% checkbox form.agree label="I agree" style="font-weight: bold;" %}
 
     <label style="font-weight: bold;">
-        <input type="checkbox" name="agree" value="1"> I agree
+        <input type="checkbox" name="agree" value="1"> <span>I agree</span>
     </label>
 
 
@@ -110,4 +117,30 @@ Settigns
 
 ``GOODFORMS_AUTO_ID`` — Automatically generate ``id`` and ``for`` attributes for fields and labels (default: ``True``)
 
-``GOODFORMS_ID_PREFIX`` — Prefix for auto-generated ``id`` and ``for`` attributes (default: ``field_``)
+``GOODFORMS_ID_PREFIX`` — Prefix for auto-generated ``id`` and ``for`` attributes. For forms without ``name`` attribute (default: ``field``)
+
+
+Changelog
+---------
+
+Master
+~~~~~~
+
+* Added ``form`` tag
+
+0.1.1
+~~~~~
+
+* Use `htmlutils <https://github.com/zenwalker/python-htmlutils>`_. instead of built-in functions.
+* Bugfixes
+
+0.1.0
+~~~~~
+
+* Initial version
+
+
+License
+-------
+
+Licensed under the MIT license.

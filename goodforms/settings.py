@@ -3,8 +3,9 @@ from django.conf import settings
 default_settings = {
     'XHTML': False,
     'AUTO_ID': True,
-    'ID_PREFIX': 'field_',
+    'ID_PREFIX': 'field',
 }
+
 
 def setup():
     for key, value in default_settings.items():
