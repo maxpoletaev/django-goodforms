@@ -1,6 +1,7 @@
+from django.template import Library, Node
+from django.template.base import token_kwargs
 from collections import OrderedDict, Iterable
 from django.forms.forms import BoundField
-from django.template import Library
 from htmlutils.html import HtmlTags
 from django.conf import settings
 
@@ -191,3 +192,36 @@ def label(field, content='', **attrs):
 def submit_button(label='Submit', **attrs):
     attrs.setdefault('type', 'submit')
     return tags.button(label, **attrs)
+
+
+@register.tag('form')
+class FormNode(Node):
+    def __init__(self, parser, token):
+        self.nodelist = parser.parse(('endform', ))
+        parser.delete_first_token()
+
+        bits = token.split_contents()[1:]
+        self.attrs = self.parse_attrs(bits, parser)
+        self.name = self.attrs.get('name')
+
+    def parse_attrs(self, bits, parser):
+        attrs = {}
+        for bit in bits:
+            kwarg = token_kwargs([bit], parser)
+
+            if kwarg:
+                key, value = kwarg.popitem()
+                attrs[key] = value
+
+        return attrs
+
+    def get_resolved_attrs(self, context):
+        kwargs = {
+            k: v.resolve(context) for k, v in self.attrs.items()
+        }
+        return kwargs
+
+    def render(self, context):
+        output = self.nodelist.render(context)
+        attrs = self.get_resolved_attrs(context)
+        return tags.form(output, **attrs)
