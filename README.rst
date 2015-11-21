@@ -18,13 +18,12 @@ The view::
     from django.shortcuts import render
     from django import forms
 
-    class MyForm(forms.ModelForm):
-        class Meta:
-            model = Client
-            fields = '__all__'
+    class LoginForm(forms.Form):
+        username = forms.CharField()
+        password = forms.PasswordField()
 
     def sign_up(request):
-        from = MyForm(initial={'gender': 'male'})
+        from = MyForm(initial={'username': 'johnsmith'})
         return render(request, 'index.html', {'form': form})
 
 
@@ -45,7 +44,8 @@ Controls
 Form tag
 ~~~~~~~~
 
-Form tag automatically inject csrf-token.
+- Form tag automatically inject csrf-token.
+- Fields use ``name`` attribute as prefix for ``id`` and ``for`` in labels.
 
 ::
 
@@ -72,7 +72,7 @@ Select
 
 You can use any dict, iterable collection or queryset as values list::
 
-    {% select form.county values=queryset_or_collection value_key="code" label_key="title" %}
+    {% select form.county values=any_iterable_object value_key="code" label_key="title" %}
 
 
 Checkbox and radio-button
@@ -118,26 +118,6 @@ Settigns
 ``GOODFORMS_AUTO_ID`` — Automatically generate ``id`` and ``for`` attributes for fields and labels (default: ``True``)
 
 ``GOODFORMS_ID_PREFIX`` — Prefix for auto-generated ``id`` and ``for`` attributes. For forms without ``name`` attribute (default: ``field``)
-
-
-Changelog
----------
-
-Master
-~~~~~~
-
-* Added ``form`` tag
-
-0.1.1
-~~~~~
-
-* Use `htmlutils <https://github.com/zenwalker/python-htmlutils>`_. instead of built-in functions.
-* Bugfixes
-
-0.1.0
-~~~~~
-
-* Initial version
 
 
 License
