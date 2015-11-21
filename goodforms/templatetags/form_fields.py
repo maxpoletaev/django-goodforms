@@ -51,7 +51,16 @@ def textarea(context, field, value=None, **attrs):
 @register.simple_tag(takes_context=True)
 def checkbox(context, field, label=None, **attrs):
     attrs.setdefault('type', 'checkbox')
+    return checkbox_or_radio(context, field, label, **attrs)
 
+
+@register.simple_tag(takes_context=True)
+def radio(context, field, label=None, **attrs):
+    attrs.setdefault('type', 'radio')
+    return checkbox_or_radio(context, field, label, **attrs)
+
+
+def checkbox_or_radio(context, field, label=None, **attrs):
     if isinstance(field, BoundField):
         attrs['name'] = field.name
 
@@ -78,12 +87,6 @@ def checkbox(context, field, label=None, **attrs):
 
     checkbox = tags.input(**input_attrs) + ' ' + tags.span(label)
     return tags.label(checkbox, **label_attrs)
-
-
-@register.simple_tag(takes_context=True)
-def radio(context, field, label=None, **attrs):
-    attrs.setdefault('type', 'radio')
-    return checkbox(context, field, label, **attrs)
 
 
 @register.simple_tag(takes_context=True)
