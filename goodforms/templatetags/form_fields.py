@@ -37,7 +37,6 @@ def textarea(context, field, value=None, **attrs):
 
         if not value:
             value = field.value()
-
         if 'required' not in attrs:
             attrs['required'] = field.field.required
 
@@ -90,7 +89,7 @@ def checkbox_or_radio(context, field, label=None, **attrs):
 
 
 @register.simple_tag(takes_context=True)
-def select(context, field, values, value_key=None, label_key=None, **attrs):
+def select(context, field, values=None, value_key=None, label_key=None, **attrs):
     placeholder = attrs.get('placeholder')
     select_value = attrs.get('value')
     options_html = ''
@@ -98,20 +97,13 @@ def select(context, field, values, value_key=None, label_key=None, **attrs):
     if placeholder:
         options_html += tags.option(placeholder, value='')
 
-    def attr(option, key):
-        if isinstance(option, dict):
-            option_value = option.get(key)
-        else:
-            option_value = getattr(option, key)
-
-        if hasattr(option_value, '__call__'):
-            option_value = option_value()
-
-        return option_value
-
     if isinstance(field, BoundField):
         attrs['name'] = field.name
         select_value = attrs.get('value', field.value())
+        choices = getattr(field.field, 'choices', None)
+
+        if choices and not values:
+            values = choices
 
     elif isinstance(field, str):
         attrs['name'] = field
@@ -124,22 +116,23 @@ def select(context, field, values, value_key=None, label_key=None, **attrs):
     elif isinstance(values, dict):
         for option_value, option_label in values.items():
             if value_key:
-                option_value = attr(option_value, value_key)
+                option_value = get_attr(option_value, value_key)
             if label_key:
-                option_label = attr(option_value, label_key)
+                option_label = get_attr(option_value, label_key)
 
             selected = str(select_value) == str(option_value)
             options_html += tags.option(option_label, value=option_value, selected=selected)
 
     elif isinstance(values, Iterable):
-        if not value_key:
-            value_key = 'id'
-        if not label_key:
-            label_key = 'name'
+        if not label_key: label_key = 'name'  # noqa
+        if not value_key: value_key = 'id'  # noqa
 
         for value in values:
-            option_value = attr(value, value_key)
-            option_label = attr(value, label_key)
+            if isinstance(value, Iterable):
+                option_value, option_label = value
+            else:
+                option_label = get_attr(value, label_key)
+                option_value = get_attr(value, value_key)
 
             selected = str(select_value) == str(option_value)
             options_html += tags.option(option_label, value=option_value, selected=selected)
@@ -193,6 +186,18 @@ class FormNode(Node):
             output += tags.input(type='hidden', name='csrfmiddlewaretoken', value=csrf_token)
 
         return tags.form(output, **attrs)
+
+
+def get_attr(obj, key):
+    if isinstance(obj, dict):
+        option_value = obj.get(key)
+    else:
+        option_value = getattr(obj, key)
+
+    if hasattr(option_value, '__call__'):
+        option_value = option_value()
+
+    return option_value
 
 
 def parse_values(values):
