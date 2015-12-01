@@ -50,6 +50,7 @@ def textarea(context, field, value=None, **attrs):
 @register.simple_tag(takes_context=True)
 def checkbox(context, field, label=None, **attrs):
     attrs.setdefault('type', 'checkbox')
+    attrs.setdefault('value', 'true')
     return checkbox_or_radio(context, field, label, **attrs)
 
 
