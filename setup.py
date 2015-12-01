@@ -12,6 +12,7 @@ setup(
     packages=['goodforms', 'goodforms.templatetags'],
     install_requires=[
         'htmlutils>=0.1.0',
+        'django>=1.7',
     ],
     classifiers=[
         'Development Status :: 4 - Beta',

@@ -1,7 +1,11 @@
 Good forms for Django
 =====================
 
-GoodForms — rails-like renderer for your form fields. Provide fully control of filed styles and attributes. It's not replacement for ``django.forms``.
+.. image:: https://travis-ci.org/zenwalker/django-goodforms.svg
+   :target: https://travis-ci.org/zenwalker/django-goodforms
+   :alt: Build Status
+
+**GoodForms** — rails-like renderer for your form fields. Provide fully control of filed styles and attributes. It's not replacement for ``django.forms``.
 
 
 Installation
