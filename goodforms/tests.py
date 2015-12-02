@@ -75,6 +75,10 @@ class FormFieldsTest(TestCase):
             '{} not in {}'.format(str(a), str(b)),
         )
 
+    def assertInList(self, a, b):
+        for item in a:
+            self.assertTrue(item in b, '{} not in {}'.format(str(a), str(b)))
+
     def test_textfield(self):
         form = MyForm(initial={'username': 'John'})
         tag, attrs = parse_html_tag(render_template('{% textfield form.username attr="value" %}', form))
@@ -114,7 +118,7 @@ class FormFieldsTest(TestCase):
         html = render_template('{% select form.country values=values %}', form, values=values)
         options = parse_html_options(parse_html_tag(html, closeable=True)[2])
 
-        self.assertEqual(options, [
+        self.assertInList(options, [
             {'attrs': {'value': 'ru', 'selected': True}, 'content': 'Russia'},
             {'attrs': {'value': 'us'}, 'content': 'United States'},
         ])
@@ -123,6 +127,17 @@ class FormFieldsTest(TestCase):
 
         values = [{'code': 'ru', 'title': 'Russia'}, {'code': 'us', 'title': 'United States'}]
         html = render_template('{% select form.country values=values label_key="title" value_key="code" %}', form, values=values)
+        options = parse_html_options(parse_html_tag(html, closeable=True)[2])
+
+        self.assertEqual(options, [
+            {'attrs': {'value': 'ru', 'selected': True}, 'content': 'Russia'},
+            {'attrs': {'value': 'us'}, 'content': 'United States'},
+        ])
+
+        """Values from list of tuples"""
+
+        values = [('ru', 'Russia'), ('us', 'United States')]
+        html = render_template('{% select form.country values=values %}', form, values=values)
         options = parse_html_options(parse_html_tag(html, closeable=True)[2])
 
         self.assertEqual(options, [

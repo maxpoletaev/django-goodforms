@@ -4,8 +4,15 @@ import django
 from django.conf import settings
 from django.core.management import call_command
 
+opts = {
+    'INSTALLED_APPS': ['goodforms'],
+    'TEMPLATES': [{
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+    }],
+    'TEMPLATE_DEBUG': True,
+}
+
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
-opts = {'INSTALLED_APPS': ['goodforms']}
 settings.configure(**opts)
 django.setup()
 

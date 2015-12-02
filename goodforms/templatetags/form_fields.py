@@ -2,6 +2,7 @@ from django.template import Library, Node
 from django.template.base import token_kwargs
 from collections import OrderedDict, Iterable
 from django.forms.forms import BoundField
+from django.utils.html import mark_safe
 from htmlutils.html import HtmlTags
 from django.conf import settings
 
@@ -27,7 +28,7 @@ def textfield(context, field, **attrs):
         attrs['name'] = field
 
     attrs.setdefault('id', get_field_id(context, attrs.get('name')))
-    return tags.input(**attrs)
+    return mark_safe(tags.input(**attrs))
 
 
 @register.simple_tag(takes_context=True)
@@ -44,7 +45,7 @@ def textarea(context, field, value=None, **attrs):
         attrs['name'] = field
 
     attrs.setdefault('id', get_field_id(context, attrs.get('name')))
-    return tags.textarea(value, **attrs)
+    return mark_safe(tags.textarea(value, **attrs))
 
 
 @register.simple_tag(takes_context=True)
@@ -72,7 +73,7 @@ def checkbox_or_radio(context, field, label=None, **attrs):
 
     if not label:
         attrs.setdefault('id', get_field_id(context, attrs.get('name')))
-        return tags.input(**attrs)
+        return mark_safe(tags.input(**attrs))
 
     input_attrs_keys = ['value', 'name', 'type', 'checked', 'id']
     label_attrs = attrs.copy()
@@ -86,7 +87,7 @@ def checkbox_or_radio(context, field, label=None, **attrs):
             del label_attrs[key]
 
     checkbox = tags.input(**input_attrs) + ' ' + tags.span(label)
-    return tags.label(checkbox, **label_attrs)
+    return mark_safe(tags.label(checkbox, **label_attrs))
 
 
 @register.simple_tag(takes_context=True)
@@ -129,7 +130,7 @@ def select(context, field, values=None, value_key=None, label_key=None, **attrs)
         if not value_key: value_key = 'id'  # noqa
 
         for value in values:
-            if isinstance(value, Iterable):
+            if isinstance(value, (list, tuple)):
                 option_value, option_label = value
             else:
                 option_label = get_attr(value, label_key)
@@ -139,7 +140,7 @@ def select(context, field, values=None, value_key=None, label_key=None, **attrs)
             options_html += tags.option(option_label, value=option_value, selected=selected)
 
     attrs.setdefault('id', get_field_id(context, attrs.get('name')))
-    return tags.select(options_html, **attrs)
+    return mark_safe(tags.select(options_html, **attrs))
 
 
 @register.simple_tag(takes_context=True)
@@ -150,13 +151,13 @@ def label(context, field, content='', **attrs):
         if not content:
             content = field.label
 
-    return tags.label(content, **attrs)
+    return mark_safe(tags.label(content, **attrs))
 
 
 @register.simple_tag
 def submit_button(label='Submit', **attrs):
     attrs.setdefault('type', 'submit')
-    return tags.button(label, **attrs)
+    return mark_safe(tags.button(label, **attrs))
 
 
 @register.tag('form')
@@ -186,7 +187,7 @@ class FormNode(Node):
         if csrf_token and csrf_token != 'NOTPROVIDED':
             output += tags.input(type='hidden', name='csrfmiddlewaretoken', value=csrf_token)
 
-        return tags.form(output, **attrs)
+        return mark_safe(tags.form(output, **attrs))
 
 
 def get_attr(obj, key):
