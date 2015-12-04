@@ -1,6 +1,7 @@
 from django.template import Library, Node
 from django.template.base import token_kwargs
 from collections import OrderedDict, Iterable
+from django.core.urlresolvers import reverse, NoReverseMatch
 from django.forms.forms import BoundField
 from django.utils.html import mark_safe
 from htmlutils.html import HtmlTags
@@ -173,7 +174,19 @@ class FormNode(Node):
         return {k: v for k, v in kwargs.items()}
 
     def resolve_attrs(self, context):
-        return {k: v.resolve(context) for k, v in self.attrs.items()}
+        attrs =  {k: v.resolve(context) for k, v in self.attrs.items()}
+        action = attrs.get('action')
+
+        if action:
+            try:
+                attrs['action'] = reverse(action)
+            except NoReverseMatch:
+                pass
+
+        if attrs.pop('multipart', None):
+            attrs['enctype'] = 'multipart/form-data'
+
+        return attrs
 
     def render(self, context):
         attrs = self.resolve_attrs(context)

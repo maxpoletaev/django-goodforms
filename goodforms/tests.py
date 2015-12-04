@@ -168,9 +168,10 @@ class FormFieldsTest(TestCase):
 
     def test_form(self):
         form = MyForm()
-        html = render_template('{% form name="myform" action="/" %}content{% endform %}')
+        html = render_template('{% form name="myform" action="form_action" multipart=True %}content{% endform %}')
         tag, attrs, content = parse_html_tag(html, closeable=True)
 
         self.assertEqual(tag, 'form')
-        self.assertEqual(attrs, {'name': 'myform', 'action': '/'})
         self.assertEqual(content, 'content')
+        self.assertEqual(attrs, {'name': 'myform', 'action': '/actions/form-action',
+                                 'enctype': 'multipart/form-data'})
