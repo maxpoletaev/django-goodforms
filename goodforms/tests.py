@@ -165,9 +165,7 @@ class FormFieldsTest(TestCase):
         self.assertEqual(attrs, {'attr': 'value', 'for': 'field_country'})
         self.assertEqual(content, 'Country')
 
-
     def test_form(self):
-        form = MyForm()
         html = render_template('{% form name="myform" action="form_action" multipart=True %}content{% endform %}')
         tag, attrs, content = parse_html_tag(html, closeable=True)
 

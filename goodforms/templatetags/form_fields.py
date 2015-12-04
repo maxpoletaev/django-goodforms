@@ -174,7 +174,7 @@ class FormNode(Node):
         return {k: v for k, v in kwargs.items()}
 
     def resolve_attrs(self, context):
-        attrs =  {k: v.resolve(context) for k, v in self.attrs.items()}
+        attrs = {k: v.resolve(context) for k, v in self.attrs.items()}
         action = attrs.get('action')
 
         if action:
