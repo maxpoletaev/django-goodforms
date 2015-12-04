@@ -53,7 +53,7 @@ Form tag
 
 ::
 
-    {% form name="myform" %}
+    {% form name="myform" action="url_or_route_name" multipart=True %}
         <!-- Form content -->
     {% endform %}
 
