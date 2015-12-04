@@ -6,10 +6,10 @@ from django.core.management import call_command
 
 opts = {
     'INSTALLED_APPS': ['goodforms'],
+    'TEMPLATE_DEBUG': True,
     'TEMPLATES': [{
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
     }],
-    'TEMPLATE_DEBUG': True,
 }
 
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))

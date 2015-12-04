@@ -155,3 +155,22 @@ class FormFieldsTest(TestCase):
             {'attrs': {'value': 'ru', 'selected': True}, 'content': 'Russia'},
             {'attrs': {'value': 'us'}, 'content': 'United States'},
         ])
+
+    def test_label(self):
+        form = MyForm()
+        html = render_template('{% label form.country attr="value" %}', form)
+        tag, attrs, content = parse_html_tag(html, closeable=True)
+
+        self.assertEqual(tag, 'label')
+        self.assertEqual(attrs, {'attr': 'value', 'for': 'field_country'})
+        self.assertEqual(content, 'Country')
+
+
+    def test_form(self):
+        form = MyForm()
+        html = render_template('{% form name="myform" action="/" %}content{% endform %}')
+        tag, attrs, content = parse_html_tag(html, closeable=True)
+
+        self.assertEqual(tag, 'form')
+        self.assertEqual(attrs, {'name': 'myform', 'action': '/'})
+        self.assertEqual(content, 'content')
