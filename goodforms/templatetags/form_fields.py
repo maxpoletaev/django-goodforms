@@ -13,9 +13,9 @@ register = Library()
 
 @register.simple_tag(takes_context=True)
 def textfield(context, field, **attrs):
-    attrs.setdefault('type', 'text')
 
     if isinstance(field, BoundField):
+        attrs.setdefault('type', field.field.widget.input_type)
         attrs['name'] = field.name
 
         if 'value' not in attrs:
@@ -26,6 +26,7 @@ def textfield(context, field, **attrs):
             attrs['required'] = field.field.required
 
     elif isinstance(field, str):
+        attrs.setdefault('type', 'text')
         attrs['name'] = field
 
     attrs.setdefault('id', get_field_id(context, attrs.get('name')))

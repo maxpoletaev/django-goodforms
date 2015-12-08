@@ -59,6 +59,8 @@ def split_tags(lines):
 
 class MyForm(forms.Form):
     username = forms.CharField()
+    email = forms.EmailField()
+    password = forms.CharField(widget=forms.PasswordInput)
     i_agree = forms.BooleanField()
     country = forms.ChoiceField(
         choices=(('ru', 'Russia'), ('us', 'United States'))
@@ -81,10 +83,17 @@ class FormFieldsTest(TestCase):
 
     def test_textfield(self):
         form = MyForm(initial={'username': 'John'})
+
         tag, attrs = parse_html_tag(render_template('{% textfield form.username attr="value" %}', form))
         expect_attrs = dict(id='field_username', type='text', name='username', value='John', attr='value', required=True)
         self.assertEqual(tag, 'input')
         self.assertInDict(attrs, expect_attrs)
+
+        tag, attrs = parse_html_tag(render_template('{% textfield form.email %}', form))
+        self.assertInDict(attrs, {'name': 'email', 'type': 'email'})
+
+        tag, attrs = parse_html_tag(render_template('{% textfield form.password %}', form))
+        self.assertInDict(attrs, {'name': 'password', 'type': 'password'})
 
     def test_textarea(self):
         form = MyForm()
